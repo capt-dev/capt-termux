@@ -5,7 +5,9 @@ echo "installing debian via proot-distro..."
 proot-distro install debian
 echo "installing everything required in debian..."
 proot-distro login debian -- apt update && apt upgrade
-proot-distro login debian -- apt install sudo
+proot-distro login debian -- apt install sudo tightvncserver
+proot-distro login debian -- apt update
+proot-distro login debian -- apt install dbus dbus-x11
 echo "downloading capt binary..."
 wget https://github.com/capt-dev/capt-termux/releases/download/v1.0.0/capt
 echo "moving to capt binary to a appropriate place..."

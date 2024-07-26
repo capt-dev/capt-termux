@@ -1,0 +1,86 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+# Helper function to print usage
+usage() {
+    echo "Usage: capt <command> [options]"
+    echo "Commands:"
+    echo "  install <pak-name>  - Install a package in Debian via proot-distro"
+    echo "  --run <pak-name>    - Run a package via proot-distro"
+    echo "  --run --gdk <pak-name> - Setup VNC and run a package with GUI"
+    exit 1
+}
+
+# Function to check and install dependencies
+check_and_install_dependencies() {
+    if ! command -v proot-distro >/dev/null 2>&1; then
+        echo "proot-distro is not installed. Would you like to install it? (y/n)"
+        read -r answer
+        if [ "$answer" = "y" ]; then
+            pkg install proot-distro
+        else
+            echo "Cannot proceed without proot-distro."
+            exit 1
+        fi
+    fi
+
+    if [ ! -d /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian ]; then
+        echo "Debian is not installed. Would you like to install it? (y/n)"
+        read -r answer
+        if [ "$answer" = "y" ]; then
+            proot-distro install debian
+        else
+            echo "Cannot proceed without Debian."
+            exit 1
+        fi
+    fi
+}
+
+# Check and install dependencies
+check_and_install_dependencies
+
+# Handle commands
+case "$1" in
+    install)
+        if [ -z "$2" ]; then
+            echo "Please specify a package name."
+            usage
+        fi
+        proot-distro login debian -- apt install "$2"
+        ;;
+
+    --run)
+        if [ -z "$2" ]; then
+            echo "Please specify a package name."
+            usage
+        fi
+        proot-distro login debian -- "$2"
+        ;;
+
+    --run)
+        if [ "$2" = "--gdk" ]; then
+            if [ -z "$3" ] || [ -z "$4" ]; then
+                echo "Please specify a package name and GUI command."
+                usage
+            fi
+
+            # Get .bashrc content
+            BASHRC_CONTENT=$(proot-distro login debian -- cat /root/.bashrc)
+            echo "$BASHRC_CONTENT" > /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.bashrc
+
+            # Setup VNC
+            echo -e "vncserver --kill :1\nvncserver :1\n" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.bashrc
+            rm -rf /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
+            echo "$4" > /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
+
+            # Run package
+            proot-distro login debian -- "$3"
+        else
+            echo "Invalid option for --run."
+            usage
+        fi
+        ;;
+
+    *)
+        usage
+        ;;
+esac

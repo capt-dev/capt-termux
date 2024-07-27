@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 
 # Helper function to print usage
 usage() {
@@ -79,7 +79,7 @@ handle_run_command() {
         echo "export GTK_IM_MODULE=xim" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
         echo "export QT_IM_MODULE=xim" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
         echo "export QT_QPA_PLATFORM=xcb" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
-        echo "eval $(dbus-launch --sh-syntax --exit-with-session)" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
+        echo "dbus-launch --sh-syntax --exit-with-session" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
         echo "$gui_command" >> /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/debian/root/.vnc/xstartup
 
         # Start proot-distro login
